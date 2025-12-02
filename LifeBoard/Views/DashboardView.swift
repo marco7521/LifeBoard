@@ -56,8 +56,6 @@ struct DashboardCard: View {
                 Spacer()
             }
             
-//            Spacer()
-            
             Text(title)
                 .font(.headline)
                 .frame(maxWidth: .infinity, alignment: .leading)
