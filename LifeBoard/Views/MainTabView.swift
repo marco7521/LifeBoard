@@ -8,33 +8,34 @@
 import SwiftUI
 
 struct MainTabView: View {
-    @EnvironmentObject var appVM: AppViewModel
+    @EnvironmentObject var app: AppViewModel
     
     var body: some View {
         TabView {
-            DashboardView(taskVM: appVM.taskViewModel,
-                          habitVM: appVM.habitViewModel,
-                          notesVM: appVM.notesViewModel)
-                .tabItem {
-                    Label("Dashboard", systemImage: "square.grid.2x2")
-                }
             
-            TaskListView(viewModel: appVM.taskViewModel)
+            DashboardView(tasks: app.tasks,
+                          habits: app.habits,
+                          notes: app.notes)
+            .tabItem {
+                Label("Dashboard", systemImage: "square.grid.2x2")
+            }
+            
+            TaskListView(viewModel: app.tasks)
                 .tabItem {
                     Label("待辦", systemImage: "checklist")
                 }
             
-            HabitView(viewModel: appVM.habitViewModel)
+            HabitView(viewModel: app.habits)
                 .tabItem {
                     Label("習慣", systemImage: "calendar")
                 }
             
-            NotesView(viewModel: appVM.notesViewModel)
+            NotesView(viewModel: app.notes)
                 .tabItem {
                     Label("筆記", systemImage: "note.text")
                 }
             
-            SettingsView(viewModel: appVM.settingsViewModel)
+            SettingsView(viewModel: app.settings)
                 .tabItem {
                     Label("設定", systemImage: "gear")
                 }

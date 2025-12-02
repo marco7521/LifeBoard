@@ -11,4 +11,5 @@ import SwiftUI
 
 final class SettingsViewModel: ObservableObject {
     @AppStorage("isDarkMode") var isDarkMode: Bool = false
+    @AppStorage("defaultTaskSortAscending") var defaultTaskSortAscending: Bool = true
 }

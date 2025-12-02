@@ -9,12 +9,12 @@ import SwiftUI
 
 @main
 struct LifeBoardApp: App {
-    @StateObject private var appViewModel = AppViewModel()
-    
+    @StateObject var app = AppViewModel()
+
     var body: some Scene {
         WindowGroup {
             MainTabView()
-                .environmentObject(appViewModel)
+                .environmentObject(app)
         }
     }
 }

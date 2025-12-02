@@ -9,37 +9,40 @@ import SwiftUI
 
 struct NotesView: View {
     @ObservedObject var viewModel: NotesViewModel
-    @State private var showAdd = false
+    @State private var showAddSheet = false
     
     var body: some View {
         NavigationStack {
             List {
-                ForEach(viewModel.filteredNotes) { note in
+                ForEach(viewModel.filtered) { note in
                     VStack(alignment: .leading, spacing: 4) {
                         Text(note.title)
                             .font(.headline)
+                        
                         Text(note.content)
                             .lineLimit(1)
                             .foregroundColor(.secondary)
+                        
                         Text(note.createdAt, style: .date)
                             .font(.caption2)
                             .foregroundColor(.gray)
                     }
+                    .padding(.vertical, 4)
                 }
                 .onDelete(perform: viewModel.delete)
             }
-            .searchable(text: $viewModel.searchText)
+            .searchable(text: $viewModel.search)
             .navigationTitle("筆記")
             .toolbar {
                 Button {
-                    showAdd = true
+                    showAddSheet = true
                 } label: {
                     Image(systemName: "plus")
                 }
             }
-            .sheet(isPresented: $showAdd) {
+            .sheet(isPresented: $showAddSheet) {
                 AddNoteView { title, content in
-                    viewModel.addNote(title: title, content: content)
+                    viewModel.add(title: title, content: content)
                 }
             }
         }
@@ -57,19 +60,27 @@ struct AddNoteView: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("標題", text: $title)
-                TextEditor(text: $content)
-                    .frame(height: 200)
+                Section("標題") {
+                    TextField("請輸入標題", text: $title)
+                }
+                
+                Section("內容") {
+                    TextEditor(text: $content)
+                        .frame(minHeight: 200)
+                }
             }
             .navigationTitle("新增筆記")
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("取消") { dismiss() }
+                    Button("取消") {
+                        dismiss()
+                    }
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("儲存") {
-                        guard !title.isEmpty else { return }
-                        onSave(title, content)
+                        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !trimmedTitle.isEmpty else { return }
+                        onSave(trimmedTitle, content)
                         dismiss()
                     }
                 }

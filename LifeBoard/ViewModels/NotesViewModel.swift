@@ -11,22 +11,34 @@ import SwiftUI
 
 final class NotesViewModel: ObservableObject {
     @Published var notes: [NoteItem] = []
-    @Published var searchText: String = ""
+    @Published var search = ""
     
-    var filteredNotes: [NoteItem] {
-        guard !searchText.isEmpty else { return notes }
+    private let repo: NoteRepository
+    
+    init(repo: NoteRepository = RealmNoteRepository()) {
+        self.repo = repo
+        load()
+    }
+    
+    func load() {
+        notes = repo.fetch()
+    }
+    
+    var filtered: [NoteItem] {
+        if search.isEmpty { return notes }
         return notes.filter {
-            $0.title.localizedCaseInsensitiveContains(searchText) ||
-            $0.content.localizedCaseInsensitiveContains(searchText)
+            $0.title.localizedCaseInsensitiveContains(search) ||
+            $0.content.localizedCaseInsensitiveContains(search)
         }
     }
     
-    func addNote(title: String, content: String) {
-        let note = NoteItem(title: title, content: content)
-        notes.append(note)
+    func add(title: String, content: String) {
+        repo.add(NoteItem(title: title, content: content))
+        load()
     }
     
     func delete(at offsets: IndexSet) {
-        notes.remove(atOffsets: offsets)
+        for i in offsets { repo.delete(notes[i]) }
+        load()
     }
 }

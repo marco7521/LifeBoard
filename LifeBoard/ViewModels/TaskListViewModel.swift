@@ -11,45 +11,37 @@ import SwiftUI
 
 final class TaskListViewModel: ObservableObject {
     @Published var tasks: [TaskItem] = []
+    private let repo: TaskRepository
     
-    // MARK: - CRUD
-    
-    func addTask(title: String,
-                 note: String? = nil,
-                 dueDate: Date) {
-        let item = TaskItem(title: title,
-                            note: note,
-                            dueDate: dueDate)
-        tasks.append(item)
+    init(repo: TaskRepository = RealmTaskRepository()) {
+        self.repo = repo
+        load()
     }
     
-    func updateTask(_ task: TaskItem,
-                    title: String,
-                    note: String?,
-                    dueDate: Date,
-                    isCompleted: Bool) {
-        guard let index = tasks.firstIndex(of: task) else { return }
-        tasks[index].title = title
-        tasks[index].note = note
-        tasks[index].dueDate = dueDate
-        tasks[index].isCompleted = isCompleted
+    func load() {
+        tasks = repo.fetch()
     }
     
-    func toggleTaskCompletion(_ task: TaskItem) {
-        guard let index = tasks.firstIndex(of: task) else { return }
-        tasks[index].isCompleted.toggle()
+    func addTask(title: String, note: String?, dueDate: Date) {
+        repo.add(TaskItem(title: title, note: note, dueDate: dueDate))
+        load()
+    }
+    
+    func toggle(_ task: TaskItem) {
+        var updated = task
+        updated.isCompleted.toggle()
+        repo.update(updated)
+        load()
     }
     
     func delete(at offsets: IndexSet) {
-        tasks.remove(atOffsets: offsets)
+        for i in offsets { repo.delete(tasks[i]) }
+        load()
     }
     
-    // 方便 Dashboard 用
     var todayTasks: [TaskItem] {
-        let calendar = Calendar.current
-        return tasks.filter {
-            calendar.isDateInToday($0.dueDate)
-        }
+        let cal = Calendar.current
+        return tasks.filter { cal.isDateInToday($0.dueDate) }
     }
     
     var completedTodayCount: Int {

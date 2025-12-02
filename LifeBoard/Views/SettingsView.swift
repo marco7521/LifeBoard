@@ -17,6 +17,11 @@ struct SettingsView: View {
                     Toggle("深色模式", isOn: $viewModel.isDarkMode)
                 }
                 
+                Section("任務") {
+                    Toggle("預設依到期日由近到遠排序",
+                           isOn: $viewModel.defaultTaskSortAscending)
+                }
+                
                 Section("關於") {
                     HStack {
                         Text("版本")

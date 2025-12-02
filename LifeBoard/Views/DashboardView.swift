@@ -8,27 +8,33 @@
 import SwiftUI
 
 struct DashboardView: View {
-    let taskVM: TaskListViewModel
-    let habitVM: HabitViewModel
-    let notesVM: NotesViewModel
-    
+    @ObservedObject var tasks: TaskListViewModel
+    @ObservedObject var habits: HabitViewModel
+    @ObservedObject var notes: NotesViewModel
+
     private let columns = [GridItem(.flexible()), GridItem(.flexible())]
     
     var body: some View {
         NavigationStack {
             ScrollView {
                 LazyVGrid(columns: columns, spacing: 16) {
-                    DashboardCard(title: "今日任務",
-                                  icon: "checkmark.circle",
-                                  value: "\(taskVM.todayTasks.count) 項")
+                    DashboardCard(
+                        title: "今日任務",
+                        icon: "checkmark.circle",
+                        value: "\(tasks.todayTasks.count)"
+                    )
                     
-                    DashboardCard(title: "今日完成習慣",
-                                  icon: "flame.fill",
-                                  value: "\(habitVM.completionCountToday()) 個")
+                    DashboardCard(
+                        title: "已完成習慣",
+                        icon: "flame.fill",
+                        value: "\(habits.todaysCount())"
+                    )
                     
-                    DashboardCard(title: "筆記數量",
-                                  icon: "note.text",
-                                  value: "\(notesVM.notes.count) 則")
+                    DashboardCard(
+                        title: "筆記總數",
+                        icon: "note.text",
+                        value: "\(notes.notes.count)"
+                    )
                 }
                 .padding()
             }

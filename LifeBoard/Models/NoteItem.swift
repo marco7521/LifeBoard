@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct NoteItem: Identifiable, Codable, Equatable {
-    let id: UUID
+struct NoteItem: Identifiable, Equatable {
+    let id: String
     var title: String
     var content: String
     var createdAt: Date
     
-    init(id: UUID = UUID(),
+    init(id: String = UUID().uuidString,
          title: String,
          content: String,
          createdAt: Date = Date()) {

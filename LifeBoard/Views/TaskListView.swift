@@ -9,43 +9,76 @@ import SwiftUI
 
 struct TaskListView: View {
     @ObservedObject var viewModel: TaskListViewModel
-    @State private var showAdd = false
+    @State private var showAddSheet = false
     
     var body: some View {
         NavigationStack {
-            List {
-                ForEach(viewModel.tasks) { task in
-                    HStack {
-                        Button {
-                            viewModel.toggleTaskCompletion(task)
-                        } label: {
-                            Image(systemName: task.isCompleted
-                                  ? "checkmark.circle.fill"
-                                  : "circle")
-                            .foregroundColor(task.isCompleted ? .green : .gray)
+            Group {
+                if viewModel.tasks.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "checklist")
+                            .font(.system(size: 40))
+                            .foregroundColor(.secondary)
+                        Text("目前還沒有待辦事項")
+                            .font(.headline)
+                            .foregroundColor(.secondary)
+                        Text("點右上角「＋」新增一個任務吧！")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else {
+                    List {
+                        ForEach(viewModel.tasks) { task in
+                            HStack {
+                                Button {
+                                    viewModel.toggle(task)
+                                } label: {
+                                    Image(systemName: task.isCompleted
+                                          ? "checkmark.circle.fill"
+                                          : "circle")
+                                        .foregroundColor(task.isCompleted ? .green : .gray)
+                                        .font(.title3)
+                                }
+                                .buttonStyle(.plain)
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Text(task.title)
+                                        .font(.body)
+                                        .strikethrough(task.isCompleted, color: .gray)
+                                    
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "calendar")
+                                        Text(task.dueDate, style: .date)
+                                    }
+                                    .font(.caption)
+                                    .foregroundColor(.secondary)
+                                    
+                                    if let note = task.note, !note.isEmpty {
+                                        Text(note)
+                                            .font(.caption)
+                                            .foregroundColor(.secondary)
+                                            .lineLimit(1)
+                                    }
+                                }
+                            }
+                            .padding(.vertical, 4)
                         }
-                        .buttonStyle(.plain)
-                        
-                        VStack(alignment: .leading) {
-                            Text(task.title)
-                                .strikethrough(task.isCompleted, color: .gray)
-                            Text(task.dueDate, style: .date)
-                                .font(.caption)
-                                .foregroundColor(.secondary)
-                        }
+                        .onDelete(perform: viewModel.delete)
                     }
                 }
-                .onDelete(perform: viewModel.delete)
             }
             .navigationTitle("待辦")
             .toolbar {
-                Button {
-                    showAdd = true
-                } label: {
-                    Image(systemName: "plus")
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        showAddSheet = true
+                    } label: {
+                        Image(systemName: "plus")
+                    }
                 }
             }
-            .sheet(isPresented: $showAdd) {
+            .sheet(isPresented: $showAddSheet) {
                 AddTaskView { title, note, date in
                     viewModel.addTask(title: title,
                                       note: note,
@@ -69,12 +102,14 @@ struct AddTaskView: View {
         NavigationStack {
             Form {
                 Section("基本資訊") {
-                    TextField("標題", text: $title)
-                    TextField("備註（可選）", text: $note)
+                    TextField("標題（必填）", text: $title)
+                    
+                    TextField("備註（選填）", text: $note, axis: .vertical)
+                        .lineLimit(1...3)
                 }
                 
                 Section("時間") {
-                    DatePicker("到期時間",
+                    DatePicker("到期日",
                                selection: $dueDate,
                                displayedComponents: .date)
                 }
@@ -88,8 +123,13 @@ struct AddTaskView: View {
                 }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("儲存") {
-                        guard !title.isEmpty else { return }
-                        onSave(title, note.isEmpty ? nil : note, dueDate)
+                        let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
+                        guard !trimmedTitle.isEmpty else { return }
+                        
+                        let trimmedNote = note.trimmingCharacters(in: .whitespacesAndNewlines)
+                        onSave(trimmedTitle,
+                               trimmedNote.isEmpty ? nil : trimmedNote,
+                               dueDate)
                         dismiss()
                     }
                 }

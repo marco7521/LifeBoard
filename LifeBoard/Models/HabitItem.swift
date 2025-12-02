@@ -7,13 +7,13 @@
 
 import Foundation
 
-struct HabitItem: Identifiable, Codable, Equatable {
-    let id: UUID
+struct HabitItem: Identifiable, Equatable {
+    let id: String
     var name: String
     /// 打卡日期
     var dates: [Date]
     
-    init(id: UUID = UUID(),
+    init(id: String = UUID().uuidString,
          name: String,
          dates: [Date] = []) {
         self.id = id

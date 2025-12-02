@@ -7,14 +7,14 @@
 
 import Foundation
 
-struct TaskItem: Identifiable, Codable, Equatable {
-    let id: UUID
+struct TaskItem: Identifiable, Equatable {
+    let id: String
     var title: String
     var note: String?
     var dueDate: Date
     var isCompleted: Bool
     
-    init(id: UUID = UUID(),
+    init(id: String = UUID().uuidString,
          title: String,
          note: String? = nil,
          dueDate: Date,
