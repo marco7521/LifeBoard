@@ -14,6 +14,7 @@ final class RealmTaskRepository: TaskRepository {
     func fetch() -> [TaskItem] {
         realm.objects(TaskObject.self)
             .map(TaskItem.from)
+            .sorted { $0.dueDate < $1.dueDate }
     }
     
     func add(_ item: TaskItem) {
